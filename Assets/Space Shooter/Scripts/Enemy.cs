@@ -17,6 +17,12 @@ public class Enemy : MonoBehaviour
     [Tooltip("VFX prefab generating after destruction")]
     public GameObject destructionVFX;
     public GameObject hitEffect;
+    
+    [Header("Pickup Drops")]
+    [Range(0f, 1f)]
+    [Tooltip("Chance to drop health pickup when destroyed (0 = never, 1 = always)")]
+    public float healthPickupDropChance = 0.15f; // 15% chance
+    public GameObject healthPickupPrefab;
 
     [HideInInspector] public int shotChance; //probability of 'Enemy's' shooting during tha path
     [HideInInspector] public float shotTimeMin, shotTimeMax; //max and min time for shooting from the beginning of the path
@@ -64,6 +70,12 @@ public class Enemy : MonoBehaviour
     //method of destroying the 'Enemy'
     void Destruction()
     {
+        // Try to drop health pickup
+        if (healthPickupPrefab != null && Random.value < healthPickupDropChance)
+        {
+            Instantiate(healthPickupPrefab, transform.position, Quaternion.identity);
+        }
+        
         Instantiate(destructionVFX, transform.position, Quaternion.identity);
         Destroy(gameObject);
     }
