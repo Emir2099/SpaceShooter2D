@@ -380,6 +380,18 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 212162588336878546, guid: 5a213a4dde83c404f8856922c5fc08ff,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -7117688312473507120, guid: ff6826300ed2771408c462f1452ce895,
+        type: 3}
+    - target: {fileID: 212835588731536264, guid: 5a213a4dde83c404f8856922c5fc08ff,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -3907438976815020539, guid: 80dd21e9494cbc04cbebe95dd6eb23ca,
+        type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
