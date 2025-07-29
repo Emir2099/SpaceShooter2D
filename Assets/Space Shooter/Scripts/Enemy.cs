@@ -46,6 +46,11 @@ public class Enemy : MonoBehaviour
     public void GetDamage(int damage)
     {
         health -= damage;           //reducing health for damage value, if health is less than 0, starting destruction procedure
+        
+        // Play hit sound
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlayHitSound();
+            
         if (health <= 0)
         {
             Destruction();

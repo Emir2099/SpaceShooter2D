@@ -11,6 +11,11 @@ public class Bonus : MonoBehaviour {
             {
                 PlayerShooting.instance.weaponPower++;
             }
+            
+            // Play pickup sound
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlayPickupSound();
+                
             Destroy(gameObject);
         }
     }

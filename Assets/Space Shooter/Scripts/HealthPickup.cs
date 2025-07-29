@@ -27,6 +27,10 @@ public class HealthPickup : MonoBehaviour
                         Instantiate(pickupEffect, transform.position, Quaternion.identity);
                     }
                     
+                    // Play pickup sound
+                    if (AudioManager.instance != null)
+                        AudioManager.instance.PlayPickupSound();
+                    
                     // Destroy the pickup
                     Destroy(gameObject);
                 }

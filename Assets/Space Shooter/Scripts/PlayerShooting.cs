@@ -60,6 +60,10 @@ public class PlayerShooting : MonoBehaviour {
     //method for a shot
     void MakeAShot() 
     {
+        // Play laser sound when shooting
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlayLaserSound();
+            
         switch (weaponPower) // according to weapon power 'pooling' the defined anount of projectiles, on the defined position, in the defined rotation
         {
             case 1:
