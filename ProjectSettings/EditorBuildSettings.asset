@@ -11,5 +11,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Space Shooter/Scenes/Level1.unity
     guid: d31945966fedec24fa8cf028f485e539
+  - enabled: 1
+    path: Assets/Space Shooter/Scenes/Level2.unity
+    guid: f74630dcb1d46084aaf9f764b30b7119
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

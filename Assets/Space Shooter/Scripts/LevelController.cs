@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 #region Serializable classes
 [System.Serializable]
@@ -24,6 +25,13 @@ public class LevelController : MonoBehaviour {
     public EnemyWaves[] enemyWaves; 
 
     public Text completedText;
+    
+    [Header("Level Progression")]
+    [Tooltip("Name of the next level to load after completion")]
+    public string nextLevelName = "Level2";
+    
+    [Tooltip("Time to wait before loading next level (in seconds)")]
+    public float timeBeforeNextLevel = 3f;
 
 
     [Header("Power-ups")]
@@ -243,6 +251,9 @@ public class LevelController : MonoBehaviour {
         }
         
         Debug.Log("Pickup spawning stopped (PowerupBonusCreation coroutine will exit)");
+        
+        // Start coroutine to load next level after delay
+        StartCoroutine(LoadNextLevelAfterDelay());
     }
     
     // Check for level timeout to prevent infinite gameplay
@@ -273,6 +284,46 @@ public class LevelController : MonoBehaviour {
                     break;
                 }
             }
+        }
+    }
+    
+    // Coroutine to load the next level after a delay
+    private IEnumerator LoadNextLevelAfterDelay()
+    {
+        Debug.Log($"Waiting {timeBeforeNextLevel} seconds before loading next level: {nextLevelName}");
+        
+        // Wait for the specified time
+        yield return new WaitForSeconds(timeBeforeNextLevel);
+        
+        // Check if the next level exists
+        if (!string.IsNullOrEmpty(nextLevelName))
+        {
+            Debug.Log($"Loading next level: {nextLevelName}");
+            
+            try
+            {
+                SceneManager.LoadScene(nextLevelName);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"Failed to load level '{nextLevelName}': {e.Message}");
+                Debug.LogError("Make sure the scene is added to Build Settings!");
+                
+                // Fallback: Try to load main menu
+                try
+                {
+                    SceneManager.LoadScene("MainMenu");
+                    Debug.Log("Loaded MainMenu as fallback");
+                }
+                catch
+                {
+                    Debug.LogError("Could not load MainMenu either. Check your scene names in Build Settings.");
+                }
+            }
+        }
+        else
+        {
+            Debug.LogWarning("Next level name is not set! Cannot load next level.");
         }
     }
 }

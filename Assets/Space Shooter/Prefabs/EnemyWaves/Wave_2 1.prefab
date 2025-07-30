@@ -42,7 +42,7 @@ GameObject:
   - component: {fileID: 4028030549383590}
   - component: {fileID: 114692055568689908}
   m_Layer: 0
-  m_Name: Wave_2
+  m_Name: Wave_2 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -78,7 +78,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bce8ed9b64f39c44bdd9d3b9f6debe3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemy: {fileID: 1373690366928948, guid: fdaaab53a8b4c0143b19d2a2e4007e44, type: 3}
+  enemy: {fileID: 1373690366928948, guid: b6bf3bb81538ec442938f214e2a65649, type: 3}
   count: 6
   speed: 30
   timeBetween: 0.5
