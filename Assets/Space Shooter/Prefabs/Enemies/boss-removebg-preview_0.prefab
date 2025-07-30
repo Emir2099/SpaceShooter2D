@@ -221,5 +221,5 @@ MonoBehaviour:
   shotChance: 0
   shotTimeMin: 0
   shotTimeMax: 0
-  bossShootInterval: 2
+  bossShootInterval: 1
   debugMode: 1

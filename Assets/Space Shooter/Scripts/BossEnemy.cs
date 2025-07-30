@@ -49,25 +49,16 @@ public class BossEnemy : Enemy
     
     private void Start()
     {
-        // Initialize shooting with random delay (replicate Enemy.Start() functionality)
-        Invoke("ActivateShooting", UnityEngine.Random.Range(shotTimeMin, shotTimeMax));
-        
-        // Additional boss initialization
-        if (debugMode)
-        {
-            Debug.Log($"Boss {gameObject.name}: Starting with shotChance={shotChance}, shotTimeMin={shotTimeMin}, shotTimeMax={shotTimeMax}");
-        }
-        
-        // Start continuous shooting pattern for boss
+        // Boss will shoot at a fixed interval, no random chance
         if (Projectile != null)
         {
             StartCoroutine(BossShootingPattern());
+            if (debugMode) Debug.Log($"Boss {gameObject.name}: Started fixed interval shooting pattern (every {bossShootInterval} seconds)");
         }
         else
         {
             Debug.LogError($"Boss {gameObject.name}: No projectile assigned! Boss won't be able to shoot.");
         }
-        
         isInitialized = true;
     }
     
@@ -83,40 +74,28 @@ public class BossEnemy : Enemy
         }
     }
     
-    // Boss-specific shooting pattern (more aggressive than regular enemies)
+    // Boss-specific shooting pattern: shoot every bossShootInterval seconds, no random chance
     private IEnumerator BossShootingPattern()
     {
-        // Wait for initial delay
-        yield return new WaitForSeconds(UnityEngine.Random.Range(shotTimeMin, shotTimeMax));
-        
+        if (debugMode) Debug.Log($"Boss {gameObject.name}: BossShootingPattern started (fixed interval)");
+        yield return new WaitForSeconds(bossShootInterval); // Initial delay
         while (gameObject != null && health > 0)
-        {
-            // Boss shoots more frequently
-            if (UnityEngine.Random.value < (float)shotChance / 100)
-            {
-                if (Projectile != null)
-                {
-                    Instantiate(Projectile, transform.position, Quaternion.identity);
-                    if (debugMode) Debug.Log($"Boss {gameObject.name}: Fired projectile");
-                }
-            }
-            
-            yield return new WaitForSeconds(bossShootInterval);
-        }
-    }
-    
-    // Single shot method (called by Invoke from Start, similar to Enemy class)
-    private void ActivateShooting()
-    {
-        if (UnityEngine.Random.value < (float)shotChance / 100)
         {
             if (Projectile != null)
             {
-                Instantiate(Projectile, gameObject.transform.position, Quaternion.identity);
-                if (debugMode) Debug.Log($"Boss {gameObject.name}: Initial shot fired");
+                Instantiate(Projectile, transform.position, Quaternion.identity);
+                if (debugMode) Debug.Log($"Boss {gameObject.name}: Fired projectile at position {transform.position}");
             }
+            else
+            {
+                Debug.LogError($"Boss {gameObject.name}: Tried to shoot but Projectile is NULL!");
+            }
+            yield return new WaitForSeconds(bossShootInterval);
         }
+        if (debugMode) Debug.Log($"Boss {gameObject.name}: BossShootingPattern ended - GameObject:{gameObject != null}, Health:{health}");
     }
+    
+    // ActivateShooting is no longer needed (removed random chance logic)
     
     // Override GetDamage to add boss-specific behavior
     public new void GetDamage(int damage)
