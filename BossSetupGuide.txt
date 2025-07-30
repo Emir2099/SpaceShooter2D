@@ -1,0 +1,22 @@
+Boss Prefab Setup Guide
+=======================
+
+Required Components:
+1. SpriteRenderer - with boss sprite assigned
+2. Enemy script - with proper values
+3. FollowThePath script 
+4. Collider2D (BoxCollider2D or CircleCollider2D)
+5. Rigidbody2D (set to Kinematic)
+
+Enemy Script Settings:
+- Health: 20 (or desired value)
+- Projectile: Assign enemy projectile prefab
+- Destruction VFX: Assign explosion effect
+- Hit Effect: Assign hit effect
+- Health Pickup Drop Chance: 0.15 (15%)
+- Health Pickup Prefab: Assign health pickup prefab
+
+Critical Setup Notes:
+- Collider2D must NOT be set as Trigger
+- The boss must have the "Enemy" tag
+- Wave script must set shotChance, shotTimeMin, shotTimeMax properly

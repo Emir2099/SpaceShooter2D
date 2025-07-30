@@ -137,7 +137,7 @@ public class CharacterSelector : MonoBehaviour
         Debug.Log($"Character {characterDatabase.characters[currentCharacterIndex].characterName} selected and saved!");
         
         // Trigger start game from MenuManager
-        FindObjectOfType<MenuManager>()?.StartGame();
+        Object.FindFirstObjectByType<MenuManager>()?.StartGame();
     }
     
     public void GoBackToMainMenu()
@@ -145,7 +145,7 @@ public class CharacterSelector : MonoBehaviour
         Debug.Log("Going back to main menu from character selection");
         
         // Tell MenuManager to show main menu
-        FindObjectOfType<MenuManager>()?.ShowMainMenu();
+        Object.FindFirstObjectByType<MenuManager>()?.ShowMainMenu();
     }
     
     // Static method to get the selected character data (used by game scene)

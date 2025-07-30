@@ -60,21 +60,90 @@ public class Wave : MonoBehaviour {
 
     IEnumerator CreateEnemyWave() //depending on chosed parameters generating enemies and defining their parameters
     {
+        // Debug information before starting wave creation
+        Debug.Log($"Starting wave creation. Enemy prefab: {(enemy != null ? enemy.name : "NULL")}");
+        Debug.Log($"Count: {count}, Speed: {speed}, TimeBetween: {timeBetween}");
+        Debug.Log($"Path points count: {(pathPoints != null ? pathPoints.Length : 0)}");
+        
+        // Validate essential components before spawning
+        if (enemy == null)
+        {
+            Debug.LogError("Wave: Enemy prefab is not assigned!");
+            yield break;
+        }
+        
+        if (pathPoints == null || pathPoints.Length == 0)
+        {
+            Debug.LogError("Wave: Path points are not assigned!");
+            yield break;
+        }
+        
+        // Check if any path points are null
+        for (int j = 0; j < pathPoints.Length; j++)
+        {
+            if (pathPoints[j] == null)
+            {
+                Debug.LogError($"Wave: Path point {j} is null!");
+                yield break;
+            }
+        }
+        
         for (int i = 0; i < count; i++) 
         {
+            Debug.Log($"Spawning enemy {i + 1}/{count}");
+            
             GameObject newEnemy;
             newEnemy = Instantiate(enemy, enemy.transform.position, Quaternion.identity);
-            FollowThePath followComponent = newEnemy.GetComponent<FollowThePath>(); 
+            
+            if (newEnemy == null)
+            {
+                Debug.LogError("Wave: Failed to instantiate enemy!");
+                yield break;
+            }
+            
+            // Check for FollowThePath component
+            FollowThePath followComponent = newEnemy.GetComponent<FollowThePath>();
+            if (followComponent == null)
+            {
+                Debug.LogError($"Wave: Enemy prefab '{enemy.name}' is missing FollowThePath component!");
+                yield break;
+            }
+            
             followComponent.path = pathPoints;         
             followComponent.speed = speed;        
             followComponent.rotationByPath = rotationByPath;
             followComponent.loop = Loop;
             followComponent.SetPath(); 
-            Enemy enemyComponent = newEnemy.GetComponent<Enemy>();  
+            
+            // Check for Enemy component
+            Enemy enemyComponent = newEnemy.GetComponent<Enemy>();
+            if (enemyComponent == null)
+            {
+                Debug.LogError($"Wave: Enemy prefab '{enemy.name}' is missing Enemy component!");
+                yield break;
+            }
+            
+            // Set shooting parameters
             enemyComponent.shotChance = shooting.shotChance; 
             enemyComponent.shotTimeMin = shooting.shotTimeMin; 
             enemyComponent.shotTimeMax = shooting.shotTimeMax;
-            newEnemy.SetActive(true);      
+            
+            // Debug shooting parameters for boss
+            if (enemy.name.ToLower().Contains("boss"))
+            {
+                Debug.Log($"BOSS SHOOTING SETUP: Chance={shooting.shotChance}%, TimeMin={shooting.shotTimeMin}s, TimeMax={shooting.shotTimeMax}s");
+                
+                // Validate boss setup if it's a BossEnemy
+                BossEnemy bossComponent = newEnemy.GetComponent<BossEnemy>();
+                if (bossComponent != null)
+                {
+                    bossComponent.ValidateBossSetup();
+                }
+            }
+            
+            newEnemy.SetActive(true);
+            
+            Debug.Log($"Successfully spawned enemy {i + 1}: {newEnemy.name}");
             yield return new WaitForSeconds(timeBetween); 
         }
         
