@@ -99,4 +99,16 @@ public class PlayerShooting : MonoBehaviour {
     {
         Instantiate(lazer, pos, Quaternion.Euler(rot));
     }
+    
+    // Disable player shooting when level is completed
+    public void DisableShooting()
+    {
+        shootingIsActive = false;
+    }
+    
+    // Enable player shooting (for future use)
+    public void EnableShooting()
+    {
+        shootingIsActive = true;
+    }
 }

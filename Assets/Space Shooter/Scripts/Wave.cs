@@ -48,6 +48,9 @@ public class Wave : MonoBehaviour {
 
     [Tooltip("if testMode is marked the wave will be re-generated after 3 sec")]
     public bool testMode;
+    
+    // Event to notify when a wave is completed
+    public static event System.Action OnWaveCompleted;
     #endregion
 
     private void Start()
@@ -74,6 +77,14 @@ public class Wave : MonoBehaviour {
             newEnemy.SetActive(true);      
             yield return new WaitForSeconds(timeBetween); 
         }
+        
+        // Trigger wave completed event (only if not in test mode and not looping)
+        if (!testMode && !Loop)
+        {
+            OnWaveCompleted?.Invoke();
+            Debug.Log("Wave completed - all enemies spawned");
+        }
+        
         if (testMode)       //if testMode is activated, waiting for 3 sec and re-generating the wave
         {
             yield return new WaitForSeconds(3);

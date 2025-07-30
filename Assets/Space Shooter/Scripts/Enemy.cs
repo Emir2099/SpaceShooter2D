@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 /// <summary>
 /// This script defines 'Enemy's' health and behavior. 
@@ -26,17 +27,33 @@ public class Enemy : MonoBehaviour
 
     [HideInInspector] public int shotChance; //probability of 'Enemy's' shooting during tha path
     [HideInInspector] public float shotTimeMin, shotTimeMax; //max and min time for shooting from the beginning of the path
+    
+    // Event to notify when an enemy is destroyed
+    public static event Action OnEnemyDestroyed;
+    
+    // Event to notify when an enemy leaves the screen
+    public static event Action OnEnemyLeftScreen;
     #endregion
 
     private void Start()
     {
-        Invoke("ActivateShooting", Random.Range(shotTimeMin, shotTimeMax));
+        Invoke("ActivateShooting", UnityEngine.Random.Range(shotTimeMin, shotTimeMax));
+    }
+    
+    private void Update()
+    {
+        // Check if enemy has left the screen (moved too far down)
+        if (transform.position.y < -10f) // Adjust this value based on your screen size
+        {
+            OnEnemyLeftScreen?.Invoke();
+            Destroy(gameObject);
+        }
     }
 
     //coroutine making a shot
     void ActivateShooting()
     {
-        if (Random.value < (float)shotChance / 100)                             //if random value less than shot probability, making a shot
+        if (UnityEngine.Random.value < (float)shotChance / 100)                             //if random value less than shot probability, making a shot
         {
             Instantiate(Projectile, gameObject.transform.position, Quaternion.identity);
         }
@@ -76,12 +93,16 @@ public class Enemy : MonoBehaviour
     void Destruction()
     {
         // Try to drop health pickup
-        if (healthPickupPrefab != null && Random.value < healthPickupDropChance)
+        if (healthPickupPrefab != null && UnityEngine.Random.value < healthPickupDropChance)
         {
             Instantiate(healthPickupPrefab, transform.position, Quaternion.identity);
         }
         
         Instantiate(destructionVFX, transform.position, Quaternion.identity);
+        
+        // Trigger the OnEnemyDestroyed event
+        OnEnemyDestroyed?.Invoke();
+        
         Destroy(gameObject);
     }
 

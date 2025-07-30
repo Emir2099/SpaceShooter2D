@@ -1,10 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 #region Serializable classes
 [System.Serializable]
-public class EnemyWaves 
+
+ 
+public class EnemyWaves
 {
     [Tooltip("time for wave generation from the moment the game started")]
     public float timeToStart;
@@ -20,6 +23,9 @@ public class LevelController : MonoBehaviour {
     //Serializable classes implements
     public EnemyWaves[] enemyWaves; 
 
+    public Text completedText;
+
+
     [Header("Power-ups")]
     public GameObject powerUp; // Weapon power-up
     public GameObject healthPickup; // Health pickup
@@ -32,12 +38,30 @@ public class LevelController : MonoBehaviour {
     public float timeBetweenPlanets;
     public float planetsSpeed;
     List<GameObject> planetsList = new List<GameObject>();
+    
+    // Tracking variables for level completion
+    private int totalEnemiesSpawned = 0;
+    private int enemiesFinished = 0; // Either destroyed or left screen
+    private int totalWaves = 0;
+    private int wavesSpawned = 0;
+    private bool levelCompleted = false;
+    private float levelStartTime;
+    private float maxLevelDuration = 300f; // 5 minutes max per level
 
     Camera mainCamera;   
 
     private void Start()
     {
         mainCamera = Camera.main;
+        levelStartTime = Time.time;
+        
+        // Subscribe to enemy events
+        Enemy.OnEnemyDestroyed += OnEnemyFinished;
+        Enemy.OnEnemyLeftScreen += OnEnemyFinished;
+        
+        // Set total number of waves
+        totalWaves = enemyWaves.Length;
+        
         //for each element in 'enemyWaves' array creating coroutine which generates the wave
         for (int i = 0; i<enemyWaves.Length; i++) 
         {
@@ -45,6 +69,31 @@ public class LevelController : MonoBehaviour {
         }
         StartCoroutine(PowerupBonusCreation());
         StartCoroutine(PlanetsCreation());
+        StartCoroutine(CheckLevelTimeout());
+    }
+    
+    private void Update()
+    {
+        // Manual level completion for testing (press L key)
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            Debug.Log("Manual level completion triggered!");
+            CompleteLevel();
+        }
+        
+        // Show debug info every few seconds
+        if (Time.time % 5f < 0.1f && !levelCompleted)
+        {
+            int activeEnemies = FindObjectsOfType<Enemy>().Length;
+            Debug.Log($"DEBUG: Active enemies: {activeEnemies}, Finished: {enemiesFinished}/{totalEnemiesSpawned}, Waves: {wavesSpawned}/{totalWaves}");
+        }
+    }
+    
+    private void OnDestroy()
+    {
+        // Clean up subscriptions
+        Enemy.OnEnemyDestroyed -= OnEnemyFinished;
+        Enemy.OnEnemyLeftScreen -= OnEnemyFinished;
     }
     
     //Create a new wave after a delay
@@ -52,16 +101,30 @@ public class LevelController : MonoBehaviour {
     {
         if (delay != 0)
             yield return new WaitForSeconds(delay);
-        if (Player.instance != null)
-            Instantiate(Wave);
+        if (Player.instance != null && !levelCompleted)
+        {
+            GameObject waveObj = Instantiate(Wave);
+            wavesSpawned++;
+            
+            // Track enemy count in the wave
+            Wave waveScript = waveObj.GetComponent<Wave>();
+            if (waveScript != null) {
+                // Count enemies in this wave
+                totalEnemiesSpawned += waveScript.count;
+                Debug.Log($"Wave {wavesSpawned} spawned with {waveScript.count} enemies. Total enemies: {totalEnemiesSpawned}");
+            }
+        }
     }
 
     //endless coroutine generating 'levelUp' bonuses and health pickups. 
     IEnumerator PowerupBonusCreation() 
     {
-        while (true) 
+        while (!levelCompleted) 
         {
             yield return new WaitForSeconds(timeForNewPowerup);
+            
+            // Skip if level is completed
+            if (levelCompleted) break;
             
             // Debug: Check if healthPickup is assigned
             if (healthPickup == null)
@@ -130,6 +193,86 @@ public class LevelController : MonoBehaviour {
             newPlanet.GetComponent<DirectMoving>().speed = planetsSpeed;
 
             yield return new WaitForSeconds(timeBetweenPlanets);
+        }
+    }
+    
+    // Handle enemy finished event (either destroyed or left screen)
+    private void OnEnemyFinished()
+    {
+        enemiesFinished++;
+        
+        Debug.Log($"Enemy finished! {enemiesFinished}/{totalEnemiesSpawned} enemies done (destroyed or left screen)");
+        Debug.Log($"Waves spawned: {wavesSpawned}/{totalWaves}");
+        
+        // Check if all enemies are finished and all waves have been spawned
+        if (enemiesFinished >= totalEnemiesSpawned && wavesSpawned >= totalWaves && totalEnemiesSpawned > 0)
+        {
+            Debug.Log("All conditions met for level completion!");
+            CompleteLevel();
+        }
+        else
+        {
+            Debug.Log($"Level not complete yet. Missing: {totalEnemiesSpawned - enemiesFinished} enemies, {totalWaves - wavesSpawned} waves");
+        }
+    }
+    
+    // Complete the level when all enemies are destroyed
+    private void CompleteLevel()
+    {
+        if (levelCompleted) return; // Only run once
+        
+        levelCompleted = true;
+        Debug.Log("LEVEL COMPLETED! All enemies finished (destroyed or left screen).");
+        
+        // Stop player shooting
+        if (PlayerShooting.instance != null)
+        {
+            PlayerShooting.instance.DisableShooting();
+            Debug.Log("Player shooting disabled");
+        }
+        
+        // Show completion text
+        if (completedText != null)
+        {
+            completedText.gameObject.SetActive(true);
+            Debug.Log("Level complete text shown");
+        }
+        else
+        {
+            Debug.LogWarning("CompletedText is not assigned in LevelController!");
+        }
+        
+        Debug.Log("Pickup spawning stopped (PowerupBonusCreation coroutine will exit)");
+    }
+    
+    // Check for level timeout to prevent infinite gameplay
+    IEnumerator CheckLevelTimeout()
+    {
+        while (!levelCompleted)
+        {
+            yield return new WaitForSeconds(10f); // Check every 10 seconds
+            
+            // If it's been too long and all waves are spawned, force completion
+            if (Time.time - levelStartTime > maxLevelDuration && wavesSpawned >= totalWaves)
+            {
+                Debug.LogWarning("Level timeout reached! Forcing completion.");
+                CompleteLevel();
+                break;
+            }
+            
+            // Alternative completion check: if all waves spawned and reasonable time has passed
+            if (wavesSpawned >= totalWaves && Time.time - levelStartTime > 60f)
+            {
+                int activeEnemies = FindObjectsOfType<Enemy>().Length;
+                Debug.Log($"Timeout check: {activeEnemies} active enemies remaining after 60 seconds");
+                
+                if (activeEnemies == 0)
+                {
+                    Debug.Log("No active enemies found, completing level");
+                    CompleteLevel();
+                    break;
+                }
+            }
         }
     }
 }
