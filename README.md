@@ -51,5 +51,5 @@ A classic arcade-style 2D space shooter game built with Unity.
 - Change player sprites in the Character Selector
 
 ## Credits
-- ![Space Shooter FREE](https://assetstore.unity.com/packages/templates/packs/space-shooter-free-107260) in the Unity Asset Store
+- [Space Shooter FREE](https://assetstore.unity.com/packages/templates/packs/space-shooter-free-107260) in the Unity Asset Store
 
