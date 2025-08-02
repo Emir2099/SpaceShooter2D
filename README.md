@@ -45,8 +45,6 @@ A classic arcade-style 2D space shooter game built with Unity.
 ### Boss Fight
 ![Boss Fight](Screenshots/gameplay_4.png)
 
-*Add your own screenshots in the `screenshots/` folder!*
-
 ## Customization
 - Adjust enemy waves and boss behavior in the Inspector
 - Add new power-ups or enemy types by extending scripts
